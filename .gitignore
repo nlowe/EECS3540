@@ -1,0 +1,8 @@
+*.o
+*.lib
+*.so
+
+.idea/
+build/
+dist/
+
