@@ -44,7 +44,7 @@
 #include "opts.h"
 
 void PrintUsage();
-void InitCopy(std::string source, std::string dst);
+int InitCopy(std::string source, std::string dst);
 
 // Global Logger for misc functions in this file
 L3::Logger Log("main");
@@ -99,15 +99,17 @@ int main(int argc, char* argv[])
         L3::Logger::LogLevel = L3::Level::OFF;
     }
 
-    InitCopy(opts.SourceFolder, opts.DestinationFolder);
+    auto result = InitCopy(opts.SourceFolder, opts.DestinationFolder);
 
-    Log.Trace("End of Main");
-    return 0;
+    Log.Trace("End of Main, exiting with " + std::to_string(result));
+    return result;
 }
 
-void InitCopy(std::string source, std::string dst)
+int InitCopy(std::string source, std::string dst)
 {
     Log.Debug("Trying to copy " + source + " to " + dst);
+
+    return 0;
 }
 
 void PrintUsage()
