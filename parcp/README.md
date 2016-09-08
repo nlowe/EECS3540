@@ -1,28 +1,23 @@
-# copytree - Recursive Directory Copy
-Still waiting for an oficial project spec, but we believe the first project will be to
-recursively copy a directory.
+# parcp - Recursive Parallel Directory Copy
+A forking file copy program that recursively copies the contents of one directory to another
 
 ## Usage
 ```
-copytree - A program that recursively copies directories
+parcp - A program that recursively copies directories
  Usage:
-      copytree [-j[N]] [-l <LEVEL>] [-q] <src> <dst>
+      parcp [-l <LEVEL>] [-q] <src> <dst>
 
  args:
-      -j[N]       Multithreaded mode. Use up to [N] threads. If [N] is not specified, use as many threads
-                  as logical cores. Each thread works on one file at a time. If you have slow disks, you
-                  might not want to enable this option
-
       -l <LEVEL>  Sets the logging level to the specified level, one of TRACE, DEBUG, INFO, WARN, ERROR,
                   or FATAL. Once set, only messages logged at or above the specified level will be printed
                   to standard output
 
       -q          Quiet Mode, disables all logging. This is equivalent to "-l OFF"
 
-      <src>       The source directory to copy from, not including itself. That is, the contents of this
+      -f <src>    The source directory to copy from, not including itself. That is, the contents of this
                   directory are copied to the destination.
 
-      <dst>       The destination directory to copy into. If the last directory in the path does not exist,
+      -t <dst>    The destination directory to copy into. If the last directory in the path does not exist,
                   it will be created.
 ```
 

@@ -40,12 +40,10 @@ public:
     /** The Destination Folder to copy to */
     std::string DestinationFolder;
 
-    /** The max number of threads to create. If set to zero, use the number of logical processors of the system */
-    uint8_t Threads = 1;
-
     /** Whether or not Quiet mode was enabled */
     bool Quiet = false;
 
+    /** Any errors encountered while parsing arguments. If this is an empty string, then no errors were encountered */
     std::string Errors = "";
 
     Options(int argc, char* argv[])
@@ -70,11 +68,6 @@ public:
             else if(i == argc-1)
             {
                 DestinationFolder = arg;
-            }
-            else if(arg.compare(0, 2, "-j") == 0)
-            {
-                Threads = arg.length() == 2 ? std::thread::hardware_concurrency() : (uint8_t)stoul(arg.substr(2));
-                Log.Trace("Threads: Set to " + std::to_string(Threads));
             }
             else if(arg == "-l")
             {

@@ -1,13 +1,9 @@
 /*
- * copytree - A program that recursively copies directories
+ * parcp - A program that recursively copies directories
  * Usage:
- *      copytree [-j[N]] [-l <LEVEL>] [-q] <src> <dst>
+ *      parcp [-j[N]] [-l <LEVEL>] [-q] -f <src> -t <dst>
  *
  * args:
- *      -j[N]       Multithreaded mode. Use up to [N] threads. If [N] is not specified, use as many threads
- *                  as logical cores. Each thread works on one file at a time. If you have slow disks, you
- *                  might not want to enable this option
- *
  *      -l <LEVEL>  Sets the logging level to the specified level, one of TRACE, DEBUG, INFO, WARN, ERROR,
  *                  or FATAL. Once set, only messages logged at or above the specified level will be printed
  *                  to standard output
@@ -46,7 +42,7 @@
 #include "opts.h"
 
 void PrintUsage();
-void InitCopy(std::string source, std::string dst, uint8_t threads);
+void InitCopy(std::string source, std::string dst);
 
 // Global Logger for misc functions in this file
 L3::Logger Log("main");
@@ -55,17 +51,17 @@ int main(int argc, char* argv[])
 {
     // Set the default log level. This can be overridden by the user.
     // Set it early so we don't miss any messages
-#if defined(COPYTREE_DEFAULT_LOG_TRACE)
+#if defined(PARCP_DEFAULT_LOG_TRACE)
     L3::Logger::LogLevel = L3::Level::TRACE;
-#elif defined(COPYTREE_DEFAULT_LOG_DEBUG)
+#elif defined(PARCP_DEFAULT_LOG_DEBUG)
     L3::Logger::LogLevel = L3::Level::DEBUG;
-#elif defined(COPYTREE_DEFAULT_LOG_INFO)
+#elif defined(PARCP_DEFAULT_LOG_INFO)
     L3::Logger::LogLevel = L3::Level::INFO;
-#elif defined(COPYTREE_DEFAULT_LOG_WARN)
+#elif defined(PARCP_DEFAULT_LOG_WARN)
     L3::Logger::LogLevel = L3::Level::WARN;
-#elif defined(COPYTREE_DEFAULT_LOG_ERROR)
+#elif defined(PARCP_DEFAULT_LOG_ERROR)
     L3::Logger::LogLevel = L3::Level::ERROR;
-#elif defined(COPYTREE_DEFAULT_LOG_FATAL)
+#elif defined(PARCP_DEFAULT_LOG_FATAL)
     L3::Logger::LogLevel = L3::Level::FATAL
 #else
     L3::Logger::LogLevel = L3::Level::INFO;
@@ -95,28 +91,24 @@ int main(int argc, char* argv[])
         L3::Logger::LogLevel = L3::Level::OFF;
     }
 
-    InitCopy(opts.SourceFolder, opts.DestinationFolder, opts.Threads);
+    InitCopy(opts.SourceFolder, opts.DestinationFolder);
 
     Log.Trace("End of Main");
     return 0;
 }
 
-void InitCopy(std::string source, std::string dst, uint8_t threads)
+void InitCopy(std::string source, std::string dst)
 {
-    Log.Debug("Trying to copy " + source + " to " + dst + " with " + std::to_string(threads) + " threads");
+    Log.Debug("Trying to copy " + source + " to " + dst);
 }
 
 void PrintUsage()
 {
-    std::cout << "copytree - A program that recursively copies directories" << std::endl;
+    std::cout << "parcp - A program that recursively copies directories" << std::endl;
     std::cout << "Usage:" << std::endl;
-    std::cout << "     copytree [-j[N]] [-l <LEVEL>] [-q] <src> <dst>" << std::endl;
+    std::cout << "     parcp [-l <LEVEL>] [-q] <src> <dst>" << std::endl;
     std::cout << std::endl;
     std::cout << "args" << std::endl;
-    std::cout << "     -j[N]       Multithreaded mode. Use up to [N] threads. If [N] is not specified, use as many threads" << std::endl;
-    std::cout << "                 as logical cores. Each thread works on one file at a time. If you have slow disks, you" << std::endl;
-    std::cout << "                 might not want to enable this option" << std::endl;
-    std::cout << std::endl;
     std::cout << "     -l <LEVEL>  Sets the logging level to the specified level, one of TRACE, DEBUG, INFO, WARN, ERROR," << std::endl;
     std::cout << "                 or FATAL. Once set, only messages logged at or above the specified level will be printed" << std::endl;
     std::cout << "                 to standard output" << std::endl;

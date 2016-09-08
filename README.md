@@ -4,7 +4,7 @@ for the Fall 2016 Semester at the University of Toledo
 
 ## Projects
 * [`L3`](L3/README.md) - A lightweight Logging Library for general logging in all projects
-* [`copytree`](CopyTree/README.md) - To Be Assigned
+* [`parcp`](parcp/README.md) - Recursive, parallel directory copy - [Project Spec](Assignments/01_Parallel_File_Copy.pdf)
 
 ## Building
 All projects are a part of the `EECS3540` cmake project. You can build all of
