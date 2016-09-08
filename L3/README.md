@@ -1,27 +1,28 @@
-# EECS 3540
-Projects, Code, and Samples for EECS3540 - Operating Systems and Systems Programming
-for the Fall 2016 Semester at the University of Toledo
+# L3 - Lightweight Logging Library
+This is a really, really simple logging library for quick, organized, and
+tiered output. I wouldn't use it for anything serious
 
-## Projects
-* [`L3`](L3/README.md) - A lightweight Logging Library for general logging in all projects
-* [`copytree`](CopyTree/README.md) - To Be Assigned
+## Usage
+Everything writes to `std::cout`.
 
-## Building
-All projects are a part of the `EECS3540` cmake project. You can build all of
-them like any other `cmake` project:
+To change the global log level simply set `L3::Logger::LogLevel` to the appropriate value.
 
-```bash
-mkdir build
-cd build
-cmake ..
-make -j
+Example:
+
+```c++
+#include "L3/Logger.h"
+
+L3::Logger Log("MyComponentName")
+
+Log.Trace("A Trace Message"); // [TRACE] [MyComponentName] A Trace Message
+Log.Debug("A Debug Message"); // [DEBUG] [MyComponentName] A Debug Message
+Log.Info("An Info Message"); // [INFO] [MyComponentName] An Info Message
+Log.Warn("A Warn Message"); // [WARN] [MyComponentName] A Warn Message
+Log.Error("An Error Message"); // [ERROR] [MyComponentName] An Error Message
+Log.Fatal("A Fatal Message"); // [FATAL] [MyComponentName] A Fatal Message
 ```
 
-> Note that these projects are designed to be run on a `UNIX`-like operating system,
-  meaning you'll need access to standard UNIX headers and libraries such as `pthread`
-
 ## License
-All projects are licensed under the `MIT` license unless otherwise stated
 
 ### The MIT License
 Copyright © `2016` `Nathan Lowe`
