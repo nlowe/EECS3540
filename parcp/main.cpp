@@ -4,6 +4,8 @@
  *      parcp [-j[N]] [-l <LEVEL>] [-q] -f <src> -t <dst>
  *
  * args:
+ *      -h,--help   Prints this help message
+ *
  *      -l <LEVEL>  Sets the logging level to the specified level, one of TRACE, DEBUG, INFO, WARN, ERROR,
  *                  or FATAL. Once set, only messages logged at or above the specified level will be printed
  *                  to standard output
@@ -82,6 +84,12 @@ int main(int argc, char* argv[])
         return -1;
     }
 
+    if(opts.PrintHelp)
+    {
+        PrintUsage();
+        return 0;
+    }
+
     if(opts.LogLevelSet)
     {
         L3::Logger::LogLevel = opts.LoggingLevel;
@@ -109,15 +117,17 @@ void PrintUsage()
     std::cout << "     parcp [-l <LEVEL>] [-q] <src> <dst>" << std::endl;
     std::cout << std::endl;
     std::cout << "args" << std::endl;
+    std::cout << "     -h,--help   Prints this help message" << std::endl;
+    std::cout << std::endl;
     std::cout << "     -l <LEVEL>  Sets the logging level to the specified level, one of TRACE, DEBUG, INFO, WARN, ERROR," << std::endl;
     std::cout << "                 or FATAL. Once set, only messages logged at or above the specified level will be printed" << std::endl;
     std::cout << "                 to standard output" << std::endl;
     std::cout << std::endl;
     std::cout << "     -q          Quiet Mode, disables all logging. This is equivalent to \"-l OFF\"" << std::endl;
     std::cout << std::endl;
-    std::cout << "     <src>       The source directory to copy from, not including itself. That is, the contents of this" << std::endl;
+    std::cout << "     -f <src>    The source directory to copy from, not including itself. That is, the contents of this" << std::endl;
     std::cout << "                 directory are copied to the destination." << std::endl;
     std::cout << std::endl;
-    std::cout << "     <dst>       The destination directory to copy into. If the last directory in the path does not exist," << std::endl;
+    std::cout << "     -t <dst>    The destination directory to copy into. If the last directory in the path does not exist," << std::endl;
     std::cout << "                 it will be created." << std::endl;
 }

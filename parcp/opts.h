@@ -43,12 +43,21 @@ public:
     /** Whether or not Quiet mode was enabled */
     bool Quiet = false;
 
+    /** Whether or not to print the usage information and exit */
+    bool PrintHelp = false;
+
     /** Any errors encountered while parsing arguments. If this is an empty string, then no errors were encountered */
     std::string Errors = "";
 
     Options(int argc, char* argv[])
     {
         Log.Debug("Parsing args");
+
+        if(argc == 2 && (std::string(argv[1]) == "-h" || std::string(argv[1]) == "--help"))
+        {
+            PrintHelp = true;
+            return;
+        }
 
         if(argc <= 2)
         {
@@ -61,13 +70,32 @@ public:
             auto arg = std::string(argv[i]);
             Log.Trace("Processing " + arg);
 
-            if (i == argc-2)
+            if(arg == "-h" || arg == "--help")
             {
-                SourceFolder = arg;
+                PrintHelp = true;
+                return;
             }
-            else if(i == argc-1)
+            else if (arg == "-f")
             {
-                DestinationFolder = arg;
+                if(i < argc - 1)
+                {
+                    SourceFolder = std::string(argv[++i]);
+                }
+                else
+                {
+                    Errors += "-f: Not enough arguments remaining for argument\n";
+                }
+            }
+            else if(arg == "-t")
+            {
+                if(i < argc - 1)
+                {
+                    DestinationFolder = std::string(argv[++i]);
+                }
+                else
+                {
+                    Errors += "-t: Not enough arguments remaining for argument\n";
+                }
             }
             else if(arg == "-l")
             {

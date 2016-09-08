@@ -5,9 +5,11 @@ A forking file copy program that recursively copies the contents of one director
 ```
 parcp - A program that recursively copies directories
  Usage:
-      parcp [-l <LEVEL>] [-q] <src> <dst>
+      parcp [-l <LEVEL>] [-q] -f <src> -t <dst>
 
  args:
+      -h,--help   Prints this help message
+
       -l <LEVEL>  Sets the logging level to the specified level, one of TRACE, DEBUG, INFO, WARN, ERROR,
                   or FATAL. Once set, only messages logged at or above the specified level will be printed
                   to standard output
