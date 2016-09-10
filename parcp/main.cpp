@@ -43,9 +43,10 @@
 #include "Logger.h"
 #include "opts.h"
 #include "util.h"
+#include "copy.h"
 
 void PrintUsage();
-int InitCopy(std::string source, std::string dst);
+int InitCopy(std::string parcpPath, std::string source, std::string dst);
 
 // Global Logger for misc functions in this file
 L3::Logger Log("main");
@@ -82,13 +83,13 @@ int main(int argc, char* argv[])
         L3::GlobalLogLevel = L3::Level::OFF;
     }
 
-    auto result = InitCopy(opts.SourceFolder, opts.DestinationFolder);
+    auto result = InitCopy(std::string(argv[0]), opts.SourceFolder, opts.DestinationFolder);
 
     Log.Trace("End of Main, exiting with " + std::to_string(result));
     return result;
 }
 
-int InitCopy(std::string source, std::string dst)
+int InitCopy(std::string parcpPath, std::string source, std::string dst)
 {
     Log.Debug("Trying to copy " + source + " to " + dst);
 
@@ -101,14 +102,7 @@ int InitCopy(std::string source, std::string dst)
 
     // TODO: Validate Destination Location
 
-    // TODO: Enumerate Source Directory at the root level
-    // TODO: And do the following:
-    // 1. For each directory encountered, fork and spawn a new instance of parcp to copy it, and remember its pid
-    // 2. For each file encountered, copy the file from source to destination
-    // 3. Wait for all child pids to complete and remember if any exited with a nonzero exit code
-    // 4. Return overall status
-
-    return 0;
+    return Copy::BeginCopy(parcpPath, source, dst);
 }
 
 void PrintUsage()
