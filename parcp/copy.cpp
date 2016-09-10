@@ -97,7 +97,8 @@ namespace Copy
                 {
                     char* args[] = {
                             const_cast<char*>(parcpPath.c_str()),
-                            (char*) "-l", (char*)"debug",
+                            (char*)"-__forked", // Signal that this is a forked process. This disables early logging
+                            (char*) "-l", const_cast<char*>(L3::Logger::NameOfLevel(L3::GlobalLogLevel).c_str()),
                             (char*)"-f", const_cast<char*>(path.c_str()),
                             (char*)"-t", const_cast<char*>(std::string(dest + "/" + details->d_name).c_str()),
                             NULL

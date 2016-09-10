@@ -49,6 +49,9 @@ public:
     /** Any errors encountered while parsing arguments. If this is an empty string, then no errors were encountered */
     std::string Errors = "";
 
+    /** Whether or not the process was "forked", which just disables logging until the copy function */
+    bool IsForked = false;
+
     Options(int argc, char* argv[])
     {
         Log.Debug("Parsing args");
@@ -122,6 +125,10 @@ public:
             {
                 Quiet = true;
                 Log.Trace("Quiet Mode Enabled");
+            }
+            else if(arg == "-__forked")
+            {
+                IsForked = true;
             }
         }
     }

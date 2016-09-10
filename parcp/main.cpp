@@ -51,11 +51,15 @@ int InitCopy(std::string parcpPath, std::string source, std::string dst);
 // Global Logger for misc functions in this file
 L3::Logger Log("main");
 
+bool isForkedProcess = false;
+
 int main(int argc, char* argv[])
 {
     Log.Trace("Starting Up (L3::GlobalLogLevel is " + L3::Logger::NameOfLevel(L3::GlobalLogLevel) + ")");
 
     auto opts = Options(argc, argv);
+
+    isForkedProcess = opts.IsForked;
 
     if(!opts.Errors.empty())
     {
@@ -85,18 +89,18 @@ int main(int argc, char* argv[])
 
     auto result = InitCopy(std::string(argv[0]), opts.SourceFolder, opts.DestinationFolder);
 
-    Log.Trace("End of Main, exiting with " + std::to_string(result));
+    if(!isForkedProcess) Log.Trace("End of Main, exiting with " + std::to_string(result));
     return result;
 }
 
 int InitCopy(std::string parcpPath, std::string source, std::string dst)
 {
-    Log.Debug("Trying to copy " + source + " to " + dst);
+    if(!isForkedProcess) Log.Debug("Trying to copy " + source + " to " + dst);
 
-    Log.Trace("Validating source location (" + source + ")");
+    if(!isForkedProcess) Log.Trace("Validating source location (" + source + ")");
     if(!util::DirectoryExists(source))
     {
-        Log.Fatal(source + " does not exist or is not a directory");
+        if(!isForkedProcess) Log.Fatal(source + " does not exist or is not a directory");
         return -1;
     }
 
