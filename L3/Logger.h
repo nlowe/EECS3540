@@ -29,6 +29,8 @@ namespace L3 {
 
     enum Level {TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF};
 
+    extern Level GlobalLogLevel;
+
     class Logger {
     public:
         Logger(std::string scope) : scope(scope){}
@@ -41,8 +43,6 @@ namespace L3 {
         inline void Warn(std::string msg)  { Log(Level::WARN, msg);  }
         inline void Error(std::string msg) { Log(Level::ERROR, msg); }
         inline void Fatal(std::string msg) { Log(Level::FATAL, msg); }
-
-        static L3::Level LogLevel;
 
         static std::string NameOfLevel(Level l)
         {

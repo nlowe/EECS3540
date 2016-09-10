@@ -17,17 +17,20 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <iostream>
-#include "Logger.h"
+#include <string>
+#include <sys/stat.h>
+#include "util.h"
 
-std::mutex L3::Logger::output_lock;
-L3::Level L3::GlobalLogLevel(L3::Level::INFO);
+/**
+ * Checks to see if the specified path exists and is a directory
+ *
+ * @param dir the path to check
+ * @return true iff the path exists and is a directory
+ */
+bool util::DirectoryExists(std::string dir)
+{
+    struct stat s;
+    int result = stat(dir.c_str(), &s);
 
-void L3::Logger::Log(L3::Level level, std::string msg) {
-    if (level == L3::Level::FATAL || (level != L3::Level::OFF && L3::GlobalLogLevel <= level))
-    {
-        output_lock.lock();
-        std::cout << "[" << NameOfLevel(level) << "] [" << scope << "] " << msg << std::endl;
-        output_lock.unlock();
-    }
+    return result != -1 && S_ISDIR(s.st_mode);
 }

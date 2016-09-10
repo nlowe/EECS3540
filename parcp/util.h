@@ -17,17 +17,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <iostream>
-#include "Logger.h"
+#ifndef EECS3540_UTIL_H
+#define EECS3540_UTIL_H
 
-std::mutex L3::Logger::output_lock;
-L3::Level L3::GlobalLogLevel(L3::Level::INFO);
+#include <string>
 
-void L3::Logger::Log(L3::Level level, std::string msg) {
-    if (level == L3::Level::FATAL || (level != L3::Level::OFF && L3::GlobalLogLevel <= level))
-    {
-        output_lock.lock();
-        std::cout << "[" << NameOfLevel(level) << "] [" << scope << "] " << msg << std::endl;
-        output_lock.unlock();
-    }
+namespace util
+{
+    bool DirectoryExists(std::string dir);
 }
+#endif //EECS3540_UTIL_H

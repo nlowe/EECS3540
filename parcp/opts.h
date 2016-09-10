@@ -72,6 +72,7 @@ public:
 
             if(arg == "-h" || arg == "--help")
             {
+                Log.Trace("Printing Help");
                 PrintHelp = true;
                 return;
             }
@@ -80,6 +81,7 @@ public:
                 if(i < argc - 1)
                 {
                     SourceFolder = std::string(argv[++i]);
+                    Log.Trace("Source Folder set to: " + SourceFolder);
                 }
                 else
                 {
@@ -91,6 +93,7 @@ public:
                 if(i < argc - 1)
                 {
                     DestinationFolder = std::string(argv[++i]);
+                    Log.Trace("Destination Folder set to: " + DestinationFolder);
                 }
                 else
                 {
@@ -105,11 +108,20 @@ public:
                     if (!L3::Logger::LevelForName(rawLevel, LoggingLevel)) {
                         Errors += " * -l: Unknown log level " + rawLevel + "\n";
                     }
+                    else
+                    {
+                        LogLevelSet = true;
+                    }
 
                     Log.Trace("LogLevel: Set to " + L3::Logger::NameOfLevel(LoggingLevel));
                 } else {
                     Errors += " * -l: Not enough arguments remaining for argument\n";
                 }
+            }
+            else if(arg == "-q")
+            {
+                Quiet = true;
+                Log.Trace("Quiet Mode Enabled");
             }
         }
     }

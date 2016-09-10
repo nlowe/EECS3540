@@ -42,6 +42,7 @@
 
 #include "Logger.h"
 #include "opts.h"
+#include "util.h"
 
 void PrintUsage();
 int InitCopy(std::string source, std::string dst);
@@ -51,25 +52,7 @@ L3::Logger Log("main");
 
 int main(int argc, char* argv[])
 {
-    // Set the default log level. This can be overridden by the user.
-    // Set it early so we don't miss any messages
-#if defined(PARCP_DEFAULT_LOG_TRACE)
-    L3::Logger::LogLevel = L3::Level::TRACE;
-#elif defined(PARCP_DEFAULT_LOG_DEBUG)
-    L3::Logger::LogLevel = L3::Level::DEBUG;
-#elif defined(PARCP_DEFAULT_LOG_INFO)
-    L3::Logger::LogLevel = L3::Level::INFO;
-#elif defined(PARCP_DEFAULT_LOG_WARN)
-    L3::Logger::LogLevel = L3::Level::WARN;
-#elif defined(PARCP_DEFAULT_LOG_ERROR)
-    L3::Logger::LogLevel = L3::Level::ERROR;
-#elif defined(PARCP_DEFAULT_LOG_FATAL)
-    L3::Logger::LogLevel = L3::Level::FATAL
-#else
-    L3::Logger::LogLevel = L3::Level::INFO;
-#endif
-
-    Log.Trace("Starting Up");
+    Log.Trace("Starting Up (L3::GlobalLogLevel is " + L3::Logger::NameOfLevel(L3::GlobalLogLevel) + ")");
 
     auto opts = Options(argc, argv);
 
@@ -92,11 +75,11 @@ int main(int argc, char* argv[])
 
     if(opts.LogLevelSet)
     {
-        L3::Logger::LogLevel = opts.LoggingLevel;
+        L3::GlobalLogLevel = opts.LoggingLevel;
     }
     else if(opts.Quiet)
     {
-        L3::Logger::LogLevel = L3::Level::OFF;
+        L3::GlobalLogLevel = L3::Level::OFF;
     }
 
     auto result = InitCopy(opts.SourceFolder, opts.DestinationFolder);
@@ -108,6 +91,22 @@ int main(int argc, char* argv[])
 int InitCopy(std::string source, std::string dst)
 {
     Log.Debug("Trying to copy " + source + " to " + dst);
+
+    Log.Trace("Validating source location (" + source + ")");
+    if(!util::DirectoryExists(source))
+    {
+        Log.Fatal(source + " does not exist or is not a directory");
+        return -1;
+    }
+
+    // TODO: Validate Destination Location
+
+    // TODO: Enumerate Source Directory at the root level
+    // TODO: And do the following:
+    // 1. For each directory encountered, fork and spawn a new instance of parcp to copy it, and remember its pid
+    // 2. For each file encountered, copy the file from source to destination
+    // 3. Wait for all child pids to complete and remember if any exited with a nonzero exit code
+    // 4. Return overall status
 
     return 0;
 }
