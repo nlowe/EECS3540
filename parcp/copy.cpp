@@ -25,6 +25,7 @@
 #include <queue>
 #include "copy.h"
 #include "Logger.h"
+#include "util.h"
 
 namespace Copy
 {
@@ -52,11 +53,44 @@ namespace Copy
         return true;
     }
 
+    bool TryCreateDirectory(std::string dir, mode_t mode)
+    {
+        auto normailizedPath = dir;
+        if(util::StringEndsWith(normailizedPath, '/')) normailizedPath = normailizedPath.substr(0, normailizedPath.length()-1);
+
+        Log.Trace("[" + std::to_string(getpid()) + "] Trying to create directory " + normailizedPath);
+        auto result = mkdir(normailizedPath.c_str(), mode);
+
+        if(result != 0)
+        {
+            if(errno != EEXIST)
+            {
+                Log.Fatal("[" + std::to_string(getpid()) + "] Unable to create directory: Error code " + std::to_string(errno));
+                return false;
+            }
+            else
+            {
+                Log.Trace(normailizedPath + " already exists");
+            }
+        }
+
+        return true;
+    }
+
     int BeginCopy(std::string parcpPath, std::string source, std::string dest)
     {
         auto myPid = getpid();
 
-        Log.Trace("[" + std::to_string(myPid) + "] BeginCopy - Scanning " + source);
+        struct stat rootStat;
+        lstat(source.c_str(), &rootStat);
+
+        // Try to create the directory if it doesn't exist, with the same mode as the source
+        if (!TryCreateDirectory(dest, rootStat.st_mode))
+        {
+            return -1;
+        }
+
+        Log.Trace("[" + std::to_string(myPid) + "] Begin Copy To '" + dest + "' - Scanning " + source);
 
         DIR* root = nullptr;
 
@@ -91,6 +125,8 @@ namespace Copy
                     continue;
                 }
 
+                auto newDest = dest + details->d_name;
+
                 // Fork and spawn new process and remember child pid
                 auto pid = fork();
                 if(pid == 0)
@@ -98,9 +134,9 @@ namespace Copy
                     char* args[] = {
                             const_cast<char*>(parcpPath.c_str()),
                             (char*)"-__forked", // Signal that this is a forked process. This disables early logging
-                            (char*) "-l", const_cast<char*>(L3::Logger::NameOfLevel(L3::GlobalLogLevel).c_str()),
+                            (char*)"-l", const_cast<char*>(L3::Logger::NameOfLevel(L3::GlobalLogLevel).c_str()),
                             (char*)"-f", const_cast<char*>(path.c_str()),
-                            (char*)"-t", const_cast<char*>(std::string(dest + details->d_name).c_str()),
+                            (char*)"-t", const_cast<char*>(newDest.c_str()),
                             NULL
                     };
 
@@ -110,7 +146,7 @@ namespace Copy
                 else
                 {
                     childPids.push(pid);
-                    Log.Debug("[" + std::to_string(myPid) + "] Spawned child process " + std::to_string(pid) + " for " + path);
+                    Log.Debug("[" + std::to_string(myPid) + "] Spawned child process " + std::to_string(pid) + " for " + path + " (copying to " + newDest + ")");
                 }
             }
             else

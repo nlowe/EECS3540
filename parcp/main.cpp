@@ -103,7 +103,7 @@ int InitCopy(std::string parcpPath, std::string source, std::string dst)
     if(!isForkedProcess) Log.Trace("Validating source location (" + source + ")");
     if(!util::DirectoryExists(source))
     {
-        if(!isForkedProcess) Log.Fatal(source + " does not exist or is not a directory");
+        Log.Fatal(source + " does not exist or is not a directory");
         return -1;
     }
 
