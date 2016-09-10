@@ -23,9 +23,12 @@
 #include <unistd.h>
 #include <cstring>
 #include <queue>
+#include <fcntl.h>
 #include "copy.h"
 #include "Logger.h"
 #include "util.h"
+
+#define COPY_BUFFER_SIZE 8192
 
 namespace Copy
 {
@@ -46,11 +49,50 @@ namespace Copy
 
     bool IsDirectory(dirent* details) { return details->d_type == DT_DIR; }
 
-    bool CopyFile(std::string source, std::string dest)
+    bool CopyFile(std::string source, std::string dest, struct stat info)
     {
-        Log.Info("[" + std::to_string(getpid()) + "] " + source);
+        auto myPid = getpid();
 
-        return true;
+        Log.Info("[" + std::to_string(myPid) + "] '" + source + "' --> '" + dest + "'");
+
+        int readerFD = open(source.c_str(), O_RDONLY);
+        if(readerFD < 0)
+        {
+            Log.Fatal("[" + std::to_string(myPid) + "] Could not open file for read " + source);
+            return false;
+        }
+
+#ifndef NO_POSIX_ADVISE
+        // Hint to the kernel that we're only sequentially reading
+        posix_fadvise(readerFD, 0, 0, POSIX_FADV_SEQUENTIAL);
+#endif
+
+        int writerFD = open(dest.c_str(), O_CREAT | O_WRONLY, info.st_mode);
+        if(writerFD < 0)
+        {
+            Log.Fatal("[" + std::to_string(myPid) + "] Could not open file for write " + dest);
+            return false;
+        }
+
+        bool error = false;
+        char buf[COPY_BUFFER_SIZE];
+        ssize_t bytesRead;
+
+        while((bytesRead = read(readerFD, &buf[0], sizeof(buf))) != 0)
+        {
+            ssize_t bytesWritten = write(writerFD, &buf[0], (size_t) bytesRead);
+
+            if(bytesRead != bytesWritten)
+            {
+                Log.Error("[" + std::to_string(myPid) + "] Falure in copying " + std::to_string(bytesRead) + " to destination. Actually wrote " + std::to_string(bytesWritten));
+                error = true;
+            }
+        }
+
+        close(readerFD);
+        close(writerFD);
+
+        return !error;
     }
 
     bool TryCreateDirectory(std::string dir, mode_t mode)
@@ -117,6 +159,8 @@ namespace Copy
 
             Log.Trace("[" + std::to_string(myPid) + "] INODE: " + std::to_string(details->d_ino) + ", A " + ModeName(file.st_mode) + ": " + path);
 
+            auto newDest = dest + details->d_name;
+
             if(IsDirectory(details))
             {
                 if(strcmp(details->d_name, ".") == 0 || strcmp(details->d_name, "..") == 0)
@@ -124,8 +168,6 @@ namespace Copy
                     Log.Trace("[" + std::to_string(myPid) + "] Skipping special entry " + std::string(details->d_name));
                     continue;
                 }
-
-                auto newDest = dest + details->d_name;
 
                 // Fork and spawn new process and remember child pid
                 auto pid = fork();
@@ -151,7 +193,7 @@ namespace Copy
             }
             else
             {
-                if(!CopyFile(path, dest)) error = true;
+                if(!CopyFile(path, newDest, file)) error = true;
             }
         }
 
