@@ -53,6 +53,12 @@ namespace Copy
     {
         auto myPid = getpid();
 
+        if((info.st_mode & S_IFMT) != S_IFREG)
+        {
+            Log.Warn("[" + std::to_string(myPid) + "] Skipping '" + source + "' (is a " + ModeName(info.st_mode) + ")");
+            return true;
+        }
+
         Log.Info("[" + std::to_string(myPid) + "] '" + source + "' --> '" + dest + "'");
 
         int readerFD = open(source.c_str(), O_RDONLY);
