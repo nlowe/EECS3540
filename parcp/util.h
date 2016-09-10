@@ -25,5 +25,7 @@
 namespace util
 {
     bool DirectoryExists(std::string dir);
+
+    bool StringEndsWith(std::string input, const char c);
 }
 #endif //EECS3540_UTIL_H

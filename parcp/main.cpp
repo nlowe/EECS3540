@@ -95,6 +95,9 @@ int main(int argc, char* argv[])
 
 int InitCopy(std::string parcpPath, std::string source, std::string dst)
 {
+    if(!util::StringEndsWith(source, '/')) source = source + '/';
+    if(!util::StringEndsWith(dst, '/')) dst = dst + '/';
+
     if(!isForkedProcess) Log.Debug("Trying to copy " + source + " to " + dst);
 
     if(!isForkedProcess) Log.Trace("Validating source location (" + source + ")");

@@ -78,7 +78,7 @@ namespace Copy
 
         while((details = readdir(root)) != nullptr)
         {
-            path = source + "/" + details->d_name;
+            path = source + details->d_name;
             lstat(path.c_str(), &file);
 
             Log.Trace("[" + std::to_string(myPid) + "] INODE: " + std::to_string(details->d_ino) + ", A " + ModeName(file.st_mode) + ": " + path);
@@ -100,11 +100,12 @@ namespace Copy
                             (char*)"-__forked", // Signal that this is a forked process. This disables early logging
                             (char*) "-l", const_cast<char*>(L3::Logger::NameOfLevel(L3::GlobalLogLevel).c_str()),
                             (char*)"-f", const_cast<char*>(path.c_str()),
-                            (char*)"-t", const_cast<char*>(std::string(dest + "/" + details->d_name).c_str()),
+                            (char*)"-t", const_cast<char*>(std::string(dest + details->d_name).c_str()),
                             NULL
                     };
 
                     execv(parcpPath.c_str(), args);
+                    Log.Fatal("Unable to start child process");
                 }
                 else
                 {
@@ -119,7 +120,6 @@ namespace Copy
         }
 
         //Wait all child pids
-
         while(!childPids.empty())
         {
             auto pid = childPids.front();
