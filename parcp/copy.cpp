@@ -148,8 +148,6 @@ namespace Copy
         struct stat file;
         std::string path;
 
-        std::queue<int> childPids;
-
         bool error = false;
 
         while((details = readdir(root)) != nullptr)
@@ -187,7 +185,6 @@ namespace Copy
                 }
                 else
                 {
-                    childPids.push(pid);
                     Log.Debug("[" + std::to_string(myPid) + "] Spawned child process " + std::to_string(pid) + " for " + path + " (copying to " + newDest + ")");
                 }
             }
@@ -198,24 +195,17 @@ namespace Copy
         }
 
         //Wait all child pids
-        while(!childPids.empty())
+        Log.Debug("[" + std::to_string(myPid) + "] Waiting for child processes to finish");
+
+        __pid_t child;
+        int status;
+        while ((child = waitpid(-1, &status, 0)))
         {
-            auto pid = childPids.front();
-
-            Log.Debug("[" + std::to_string(myPid) + "] Waiting for child process " + std::to_string(pid) + " to finish");
-
-            int status;
-            if(waitpid(pid, &status, 0) == pid)
+            if(errno == ECHILD) break;
+            if(status != 0)
             {
-                if(status != 0) error = true;
+                Log.Error("[" + std::to_string(myPid) + "] Child process " + std::to_string(child) + " exited with code " + std::to_string(status));
             }
-            else
-            {
-                Log.Fatal("[" + std::to_string(myPid) + "] Couldn't wait on pid " + std::to_string(pid));
-                error = true;
-            }
-
-            childPids.pop();
         }
 
         closedir(root);
