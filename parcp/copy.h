@@ -24,7 +24,7 @@
 
 namespace Copy
 {
-    int BeginCopy(std::string parcpPath, std::string source, std::string dest);
+    int BeginCopy(std::string source, std::string dest);
 }
 
 #endif //EECS3540_COPY_H

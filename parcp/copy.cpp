@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include "copy.h"
 #include "Logger.h"
+#include "opts.h"
 #include "util.h"
 
 #define COPY_BUFFER_SIZE 8192
@@ -125,7 +126,7 @@ namespace Copy
         return true;
     }
 
-    int BeginCopy(std::string parcpPath, std::string source, std::string dest)
+    int BeginCopy(std::string source, std::string dest)
     {
         auto myPid = getpid();
 
@@ -178,15 +179,21 @@ namespace Copy
                 if(pid == 0)
                 {
                     char* args[] = {
-                            const_cast<char*>(parcpPath.c_str()),
+                            const_cast<char*>(Options::CommandLineArgs.ProgramPath.c_str()),
                             (char*)"-__forked", // Signal that this is a forked process. This disables early logging
                             (char*)"-l", const_cast<char*>(L3::Logger::NameOfLevel(L3::GlobalLogLevel).c_str()),
                             (char*)"-f", const_cast<char*>(path.c_str()),
                             (char*)"-t", const_cast<char*>(newDest.c_str()),
+                            NULL, // Placeholder for "-q" if needed
                             NULL
                     };
 
-                    execv(parcpPath.c_str(), args);
+                    if(Options::CommandLineArgs.Quiet)
+                    {
+                        args[9] = (char*)"-q";
+                    }
+
+                    execv(Options::CommandLineArgs.ProgramPath.c_str(), args);
                     Log.Fatal("Unable to start child process");
                 }
                 else

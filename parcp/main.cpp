@@ -46,7 +46,7 @@
 #include "copy.h"
 
 void PrintUsage();
-int InitCopy(std::string parcpPath, std::string source, std::string dst);
+int InitCopy(std::string source, std::string dst);
 
 // Global Logger for misc functions in this file
 L3::Logger Log("main");
@@ -57,14 +57,14 @@ int main(int argc, char* argv[])
 {
     Log.Trace("Starting Up (L3::GlobalLogLevel is " + L3::Logger::NameOfLevel(L3::GlobalLogLevel) + ")");
 
-    auto opts = Options(argc, argv);
+    Options::CommandLineArgs.parse(argc, argv);
 
-    isForkedProcess = opts.IsForked;
+    isForkedProcess = Options::CommandLineArgs.IsForked;
 
-    if(!opts.Errors.empty())
+    if(!Options::CommandLineArgs.Errors.empty())
     {
         Log.Fatal("Failed to parse arguments:");
-        Log.Fatal(opts.Errors);
+        Log.Fatal(Options::CommandLineArgs.Errors);
 
         Log.Fatal("Usage: \n");
         PrintUsage();
@@ -72,28 +72,28 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    if(opts.PrintHelp)
+    if(Options::CommandLineArgs.PrintHelp)
     {
         PrintUsage();
         return 0;
     }
 
-    if(opts.LogLevelSet)
+    if(Options::CommandLineArgs.LogLevelSet)
     {
-        L3::GlobalLogLevel = opts.LoggingLevel;
+        L3::GlobalLogLevel = Options::CommandLineArgs.LoggingLevel;
     }
-    else if(opts.Quiet)
+    else if(Options::CommandLineArgs.Quiet)
     {
         L3::GlobalLogLevel = L3::Level::OFF;
     }
 
-    auto result = InitCopy(std::string(argv[0]), opts.SourceFolder, opts.DestinationFolder);
+    auto result = InitCopy(Options::CommandLineArgs.SourceFolder, Options::CommandLineArgs.DestinationFolder);
 
     if(!isForkedProcess) Log.Trace("End of Main, exiting with " + std::to_string(result));
     return result;
 }
 
-int InitCopy(std::string parcpPath, std::string source, std::string dst)
+int InitCopy(std::string source, std::string dst)
 {
     if(!util::StringEndsWith(source, '/')) source = source + '/';
     if(!util::StringEndsWith(dst, '/')) dst = dst + '/';
@@ -107,9 +107,7 @@ int InitCopy(std::string parcpPath, std::string source, std::string dst)
         return -1;
     }
 
-    // TODO: Validate Destination Location
-
-    return Copy::BeginCopy(parcpPath, source, dst);
+    return Copy::BeginCopy(source, dst);
 }
 
 void PrintUsage()

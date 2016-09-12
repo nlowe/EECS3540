@@ -30,6 +30,8 @@ class Options
 private:
     L3::Logger Log{"Options"};
 public:
+    static Options CommandLineArgs;
+
     /** The Logging Level to set */
     L3::Level LoggingLevel = L3::Level::INFO;
     /** Whether or not the log level was changed */
@@ -52,86 +54,9 @@ public:
     /** Whether or not the process was "forked", which just disables logging until the copy function */
     bool IsForked = false;
 
-    Options(int argc, char* argv[])
-    {
-        Log.Debug("Parsing args");
+    std::string ProgramPath;
 
-        if(argc == 2 && (std::string(argv[1]) == "-h" || std::string(argv[1]) == "--help"))
-        {
-            PrintHelp = true;
-            return;
-        }
-
-        if(argc <= 2)
-        {
-            Errors = "Incorrect Syntax: Not Enough Arguments";
-            return;
-        }
-
-        for(int i=1; i < argc; i++)
-        {
-            auto arg = std::string(argv[i]);
-            Log.Trace("Processing " + arg);
-
-            if(arg == "-h" || arg == "--help")
-            {
-                Log.Trace("Printing Help");
-                PrintHelp = true;
-                return;
-            }
-            else if (arg == "-f")
-            {
-                if(i < argc - 1)
-                {
-                    SourceFolder = std::string(argv[++i]);
-                    Log.Trace("Source Folder set to: " + SourceFolder);
-                }
-                else
-                {
-                    Errors += "-f: Not enough arguments remaining for argument\n";
-                }
-            }
-            else if(arg == "-t")
-            {
-                if(i < argc - 1)
-                {
-                    DestinationFolder = std::string(argv[++i]);
-                    Log.Trace("Destination Folder set to: " + DestinationFolder);
-                }
-                else
-                {
-                    Errors += "-t: Not enough arguments remaining for argument\n";
-                }
-            }
-            else if(arg == "-l")
-            {
-                if (i < argc - 1)
-                {
-                    auto rawLevel = std::string(argv[++i]);
-                    if (!L3::Logger::LevelForName(rawLevel, LoggingLevel)) {
-                        Errors += " * -l: Unknown log level " + rawLevel + "\n";
-                    }
-                    else
-                    {
-                        LogLevelSet = true;
-                    }
-
-                    Log.Trace("LogLevel: Set to " + L3::Logger::NameOfLevel(LoggingLevel));
-                } else {
-                    Errors += " * -l: Not enough arguments remaining for argument\n";
-                }
-            }
-            else if(arg == "-q")
-            {
-                Quiet = true;
-                Log.Trace("Quiet Mode Enabled");
-            }
-            else if(arg == "-__forked")
-            {
-                IsForked = true;
-            }
-        }
-    }
+    void parse(int argc, char* argv[]);
 };
 
 #endif //EECS3540_COPYTREE_OPTS_H

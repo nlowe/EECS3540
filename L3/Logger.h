@@ -54,6 +54,7 @@ namespace L3 {
                 case Level::WARN:  return "WARN";
                 case Level::ERROR: return "ERROR";
                 case Level::FATAL: return "FATAL";
+                case Level::OFF:   return "OFF";
             }
 
             assert(false);
