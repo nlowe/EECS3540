@@ -37,24 +37,67 @@ namespace Copy
 
     std::string ModeName(mode_t mode)
     {
-        if((mode & S_IFMT) == S_IFREG) return "RegularFile";
-        if((mode & S_IFMT) == S_IFDIR) return "Directory";
-        if((mode & S_IFMT) == S_IFCHR) return "CharacterSpecialDevice";
-        if((mode & S_IFMT) == S_IFBLK) return "BlockDevice";
-        if((mode & S_IFMT) == S_IFLNK) return "SymbolicLink";
-        if((mode & S_IFMT) == S_IFIFO) return "FIFO";
-        if((mode & S_IFMT) == S_IFSOCK) return "UnixDomainSocket";
+        if(S_ISLNK(mode)) return "SymbolicLink";
+        if(S_ISREG(mode)) return "RegularFile";
+        if(S_ISDIR(mode)) return "Directory";
+        if(S_ISCHR(mode)) return "CharacterSpecialDevice";
+        if(S_ISBLK(mode)) return "BlockDevice";
+        if(S_ISFIFO(mode)) return "FIFO";
+        if(S_ISSOCK(mode)) return "UnixDomainSocket";
 
         return "UNKNOWN";
     }
 
     bool IsDirectory(dirent* details) { return details->d_type == DT_DIR; }
 
+    bool CreateSymlink(std::string source, std::string dest, struct stat info)
+    {
+        auto myPid = getpid();
+        char* linkedTo = new char[PATH_MAX] {0};
+
+        ssize_t len = readlink(source.c_str(), linkedTo, (size_t) (info.st_size + 1));
+
+        bool error = false;
+        if(len > info.st_size)
+        {
+            Log.Fatal("[" + std::to_string(myPid) + "] Symlink may have changed on disk! readlink returned a larger value than st_size from stat");
+            error = true;
+        }
+        else
+        {
+            Log.Info("[" + std::to_string(myPid) + "] link ('" + source + "') '" + dest + "' --> '" + std::string(linkedTo) + "'");
+            if (symlink(linkedTo, dest.c_str()) != 0)
+            {
+                if(errno == EACCES) Log.Fatal("[" + std::to_string(myPid) + "] Failed to create symlink (EACCES)");
+                if(errno == EDQUOT) Log.Fatal("[" + std::to_string(myPid) + "] Failed to create symlink (EDQUOT)");
+                if(errno == EEXIST) Log.Fatal("[" + std::to_string(myPid) + "] Failed to create symlink (EEXIST)");
+                if(errno == EFAULT) Log.Fatal("[" + std::to_string(myPid) + "] Failed to create symlink (EFAULT)");
+                if(errno == EIO) Log.Fatal("[" + std::to_string(myPid) + "] Failed to create symlink (EIO)");
+                if(errno == ELOOP) Log.Fatal("[" + std::to_string(myPid) + "] Failed to create symlink (ELOOP)");
+                if(errno == ENAMETOOLONG) Log.Fatal("[" + std::to_string(myPid) + "] Failed to create symlink (ENAMETOOLONG)");
+                if(errno == ENOENT) Log.Fatal("[" + std::to_string(myPid) + "] Failed to create symlink (ENOENT)");
+                if(errno == ENOMEM) Log.Fatal("[" + std::to_string(myPid) + "] Failed to create symlink (ENOMEM)");
+                if(errno == ENOSPC) Log.Fatal("[" + std::to_string(myPid) + "] Failed to create symlink (ENOSPC)");
+                if(errno == ENOTDIR) Log.Fatal("[" + std::to_string(myPid) + "] Failed to create symlink (ENOTDIR)");
+                if(errno == EPERM) Log.Fatal("[" + std::to_string(myPid) + "] Failed to create symlink (EPERM)");
+                if(errno == EROFS) Log.Fatal("[" + std::to_string(myPid) + "] Failed to create symlink (EROFS)");
+                if(errno == EBADF) Log.Fatal("[" + std::to_string(myPid) + "] Failed to create symlink (EBADF)");
+
+                error = true;
+            }
+        }
+
+        delete[] linkedTo;
+        return !error;
+    }
+
     bool CopyFile(std::string source, std::string dest, struct stat info)
     {
         auto myPid = getpid();
 
-        if((info.st_mode & S_IFMT) != S_IFREG)
+        if(S_ISLNK(info.st_mode)) return CreateSymlink(source, dest, info);
+
+        if(!S_ISREG(info.st_mode))
         {
             Log.Warn("[" + std::to_string(myPid) + "] Skipping '" + source + "' (is a " + ModeName(info.st_mode) + ")");
             return true;
@@ -91,7 +134,7 @@ namespace Copy
 
             if(bytesRead != bytesWritten)
             {
-                Log.Error("[" + std::to_string(myPid) + "] Falure in copying " + std::to_string(bytesRead) + " to destination. Actually wrote " + std::to_string(bytesWritten));
+                Log.Error("[" + std::to_string(myPid) + "] Failure in copying " + std::to_string(bytesRead) + " to destination. Actually wrote " + std::to_string(bytesWritten));
                 error = true;
             }
         }
@@ -131,7 +174,7 @@ namespace Copy
         auto myPid = getpid();
 
         struct stat rootStat;
-        lstat(source.c_str(), &rootStat);
+        stat(source.c_str(), &rootStat);
 
         // Try to create the directory if it doesn't exist, with the same mode as the source
         if (!TryCreateDirectory(dest, rootStat.st_mode))
