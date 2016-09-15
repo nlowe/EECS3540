@@ -19,8 +19,16 @@
 
 #include "opts.h"
 
+/**
+ * The options passed on the command line to the program
+ */
 Options Options::CommandLineArgs;
 
+/**
+ * Parses the specified arguments
+ * @param argc the number of arguments passed
+ * @param argv an array of c-strings containing the arguments
+ */
 void Options::parse(int argc, char* argv[])
 {
     Log.Debug("Parsing args");

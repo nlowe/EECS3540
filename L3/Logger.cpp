@@ -23,7 +23,16 @@
 std::mutex L3::Logger::output_lock;
 L3::Level L3::GlobalLogLevel(L3::Level::INFO);
 
+/**
+ * Write the specified message to standard out at the specified level. If the logger is not configured to log
+ * at or below this level, or the logger is disabled, the message will not be emitted and the call returns
+ * immediately. Note that fatal messages will always be emitted.
+ *
+ * @param level The level of the message
+ * @param msg The message to log
+ */
 void L3::Logger::Log(L3::Level level, std::string msg) {
+    // Log if the level is FATAL, or if the logger isn't disabled and the specified level is acceptable
     if (level == L3::Level::FATAL || (level != L3::Level::OFF && L3::GlobalLogLevel <= level))
     {
         output_lock.lock();

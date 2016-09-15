@@ -25,11 +25,15 @@
 #include <thread>
 #include "Logger.h"
 
+/**
+ * A model for all possible arguments passed on the command line
+ */
 class Options
 {
 private:
     L3::Logger Log{"Options"};
 public:
+    /** The options passed on the command line to the program */
     static Options CommandLineArgs;
 
     /** The Logging Level to set */
@@ -54,8 +58,14 @@ public:
     /** Whether or not the process was "forked", which just disables logging until the copy function */
     bool IsForked = false;
 
+    /** The path to the program, used to fork new copies */
     std::string ProgramPath;
 
+    /**
+     * Parses the specified arguments
+     * @param argc the number of arguments passed
+     * @param argv an array of c-strings containing the arguments
+     */
     void parse(int argc, char* argv[]);
 };
 

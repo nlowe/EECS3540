@@ -24,8 +24,23 @@
 
 namespace util
 {
+    /**
+     * Checks to see if the specified path exists and is a directory
+     *
+     * @param dir the path to check
+     * @return true iff the path exists and is a directory
+     */
     bool DirectoryExists(std::string dir);
 
-    bool StringEndsWith(std::string input, const char c);
+    /**
+     * Checks to see if the specified input string ends with the specified character
+     * @param input the string to check
+     * @param c the character to check for
+     * @return true iff the input string ends with the specified character
+     */
+    inline bool StringEndsWith(std::string input, const char c)
+    {
+        return input.back() == c;
+    }
 }
 #endif //EECS3540_UTIL_H

@@ -27,23 +27,93 @@
 
 namespace L3 {
 
-    enum Level {TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF};
+    /** Represents a logging level */
+    enum Level {
+        /** The most verbose logging level */
+        TRACE,
+        /** A level inbetween info and trace, used for debugging */
+        DEBUG,
+        /** A standard logging level for general messages*/
+        INFO,
+        /** A logging level used for warnings */
+        WARN,
+        /** A logging level used for recoverable errors */
+        ERROR,
+        /** A logging level used for non-recoverable errors */
+        FATAL,
+        /** Specifies that the logger should be disabled */
+        OFF
+    };
 
+    /** The level all loggers will log at */
     extern Level GlobalLogLevel;
 
+    /**
+     * A general purpose class for writing log messages to standard output. The output is thread safe but will
+     * block on logging calls until standard out becomes available.
+     */
     class Logger {
     public:
+        /**
+         * Construct a logger with the specified scope
+         * @param scope the scope of the logger
+         * @return a new Logger Object
+         */
         Logger(std::string scope) : scope(scope){}
 
+        /**
+         * Write the specified message to standard out at the specified level. If the logger is not configured to log
+         * at or below this level, or the logger is disabled, the message will not be emitted and the call returns
+         * immediately. Note that fatal messages will always be emitted.
+         *
+         * @param level The level of the message
+         * @param msg The message to log
+         */
         void Log(Level level, std::string msg);
 
+        /**
+         * Write the specified message at the TRACE level to standard output
+         *
+         * @param msg the message to write
+         */
         inline void Trace(std::string msg) { Log(Level::TRACE, msg); }
+        /**
+         * Write the specified message at the DEBUG level to standard output
+         *
+         * @param msg the message to write
+         */
         inline void Debug(std::string msg) { Log(Level::DEBUG, msg); }
+        /**
+         * Write the specified message at the INFO level to standard output
+         *
+         * @param msg the message to write
+         */
         inline void Info(std::string msg)  { Log(Level::INFO, msg);  }
+        /**
+         * Write the specified message at the WARN level to standard output
+         *
+         * @param msg the message to write
+         */
         inline void Warn(std::string msg)  { Log(Level::WARN, msg);  }
+        /**
+         * Write the specified message at the ERROR level to standard output
+         *
+         * @param msg the message to write
+         */
         inline void Error(std::string msg) { Log(Level::ERROR, msg); }
+        /**
+         * Write the specified message at the TRACE level to standard output
+         *
+         * @param msg the message to write
+         */
         inline void Fatal(std::string msg) { Log(Level::FATAL, msg); }
 
+        /**
+         * Gets the name of the specified level as a string
+         *
+         * @param l the level to get
+         * @return the name of the level, as a string
+         */
         static std::string NameOfLevel(Level l)
         {
             switch(l)
@@ -61,6 +131,13 @@ namespace L3 {
             return "UNKNOWN";
         }
 
+        /**
+         * Gets the specified level by name (case insensitive)
+         *
+         * @param rawLevel the level to try to get
+         * @param level the result of the operation
+         * @return true iff the specified level was found
+         */
         static bool LevelForName(std::string rawLevel, L3::Level& level)
         {
             std::transform(rawLevel.begin(), rawLevel.end(), rawLevel.begin(), ::tolower);

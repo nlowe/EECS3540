@@ -34,8 +34,3 @@ bool util::DirectoryExists(std::string dir)
 
     return result != -1 && S_ISDIR(s.st_mode);
 }
-
-bool util::StringEndsWith(std::string input, const char c)
-{
-    return input.back() == c;
-}

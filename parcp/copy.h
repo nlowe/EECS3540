@@ -24,6 +24,14 @@
 
 namespace Copy
 {
+    /**
+     * Begin a file copy operation from the specified directory to the specified directory. The source directory
+     * should exist, it is not validated.
+     *
+     * @param source The directory to copy from
+     * @param dest The directory to copy to. It will be created if it does not exist
+     * @return the status code for the operation. 0 for success, failure otherwise.
+     */
     int BeginCopy(std::string source, std::string dest);
 }
 
