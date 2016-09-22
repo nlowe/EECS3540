@@ -147,8 +147,8 @@ namespace Copy
         }
 
 #ifndef NO_POSIX_ADVISE
-        // Hint to the kernel that we're only sequentially reading
-        posix_fadvise(readerFD, 0, 0, POSIX_FADV_SEQUENTIAL);
+        // Hint to the kernel that we're only sequentially, reading once
+        posix_fadvise(readerFD, 0, 0, POSIX_FADV_SEQUENTIAL | POSIX_FADV_NOREUSE);
 #endif
 
         // Open the file for write
