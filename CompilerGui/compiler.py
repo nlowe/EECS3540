@@ -1,6 +1,5 @@
 #!/user/bin/env python3
 
-from tkinter import *
 from tkinter.ttk import *
 from tkinter.filedialog import *
 from idlelib.WidgetRedirector import WidgetRedirector
