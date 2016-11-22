@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import subprocess
 from tkinter.ttk import *
 from tkinter.filedialog import *
 from idlelib.WidgetRedirector import WidgetRedirector
@@ -7,7 +7,7 @@ from subprocess import check_output
 
 
 COMPILERS = [{'text': "No Compilers Found", 'path': ""}]
-CPP_STANDARDS = ["c++14", "c++11", "c++99"]
+CPP_STANDARDS = ["c++14", "c++11", "c++98"]
 OPTIMIZE_FLAGS = [
     {'text': "-O0 (Optimize for Compile Time)", 'value': "-O0"},
     {'text': "-O1 (Optimize for code size and speed)", 'value': "-O1"},
@@ -46,7 +46,7 @@ class SourcesBox(Frame):
 
         self.callback_func = callback
 
-        self.rowconfigure(0, weight=1)
+        self.rowconfigure(0, weight=9)
         self.rowconfigure(1, weight=1)
 
         self.columnconfigure(0, weight=1)
@@ -103,9 +103,9 @@ class MainWindow(Frame):
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
-        self.rowconfigure(3, weight=2)
+        self.rowconfigure(3, weight=55)
         self.rowconfigure(4, weight=1)
-        self.rowconfigure(5, weight=6)
+        self.rowconfigure(5, weight=99)
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=2)
@@ -139,7 +139,9 @@ class MainWindow(Frame):
         self.executable.grid(row=4, column=1, sticky=E+W)
 
         self.debug_data = IntVar()
-        self.debug = Checkbutton(self, text="Debug", variable=self.debug_data, command=lambda *a, **kw: self.rebuild_command())
+        self.debug = Checkbutton(
+            self, text="Debug", variable=self.debug_data, command=lambda *a, **kw: self.rebuild_command()
+        )
         self.debug.grid(row=1, column=4, sticky=E+W)
 
         self.optimize_label = Label(self, text="Optimize")
@@ -153,7 +155,7 @@ class MainWindow(Frame):
         self.generated_command.grid(row=3, column=2, columnspan=3, sticky=N+S+E+W)
 
         self.compile_button = Button(self, text="Compile", command=self.run_compile)
-        self.compile_button.grid(row=4, column=2, columnspan=3, sticky=N+S+E+W)
+        self.compile_button.grid(row=4, column=2, columnspan=3, sticky=E+W)
 
         self.compiler_output = ReadOnlyText(self)
         self.compiler_output.grid(row=5, column=0, columnspan=5, sticky=N + E + S + W)
@@ -181,7 +183,12 @@ class MainWindow(Frame):
             self.__generated_cmd += "-g "
 
         if self.executable.get() is not None and self.executable.get() is not "":
-            self.__generated_cmd += "-O " + self.executable.get() + " "
+            self.__generated_cmd += "-o " + self.executable.get() + " "
+
+        if len(self.sources.get_sources()) <= 0:
+            self.compile_button.config(state='disabled')
+        else:
+            self.compile_button.config(state='normal')
 
         for file in self.sources.get_sources():
             self.__generated_cmd += "'" + file + "' "
@@ -193,8 +200,29 @@ class MainWindow(Frame):
         self.generated_command.delete("1.0", END)
         self.generated_command.insert(END, cmd)
 
+    def append_compiler_output_line(self, msg):
+        self.compiler_output.insert(END, msg + "\n")
+        self.compiler_output.see(END)
+
     def run_compile(self):
-        print(self.__generated_cmd)
+        self.append_compiler_output_line(os.getcwd() + "> " + self.__generated_cmd)
+
+        compiler = subprocess.Popen(
+                self.__generated_cmd.rstrip() + " 2>&1",
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=os.getcwd()
+            )
+
+        (out, err) = compiler.communicate()
+        rc = compiler.returncode
+
+        self.append_compiler_output_line(out.decode('UTF-8'))
+
+        self.append_compiler_output_line(
+            COMPILERS[self.compiler_select.current()]["path"] + " exited with status " + str(rc) + "\n"
+        )
 
 
 if __name__ == "__main__":
@@ -207,4 +235,7 @@ if __name__ == "__main__":
 
     app = MainWindow(master=root)
     app.master.title("Compiler Helper")
+
+    root.geometry("800x480")
+
     app.mainloop()
