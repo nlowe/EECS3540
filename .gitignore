@@ -1,6 +1,7 @@
 *.o
 *.lib
 *.so
+*.out
 
 .idea/
 build/

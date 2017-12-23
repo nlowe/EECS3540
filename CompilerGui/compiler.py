@@ -2,7 +2,10 @@
 import subprocess
 from tkinter.ttk import *
 from tkinter.filedialog import *
-from idlelib.WidgetRedirector import WidgetRedirector
+try:
+    from idlelib.WidgetRedirector import WidgetRedirector
+except ImportError:
+    from idlelib.redirector import WidgetRedirector
 from subprocess import check_output
 
 
